@@ -122,6 +122,7 @@ perm = randperm(T,init_batch);
 switch filetype
     case 'tif'
         Y1 = imread(Y,'Index',perm(1),'Info',tiffInfo);
+        disp(class(Y1))
         Y_temp = zeros(sizY(1),sizY(2),init_batch,'like',Y1);
         Y_temp(:,:,1) = Y1;
         for tt = 2:init_batch
@@ -202,9 +203,10 @@ switch lower(options.output_type)
         M_final = zeros([sizY,T],data_type);
     case 'memmap'
         M_final = matfile(filename,'Writable',true);
-        if nd == 2; M_final.Y(d1,d2,T) = zeros(1,data_type); end
-        if nd == 3; M_final.Y(d1,d2,d3,T) = zeros(1,data_type); end
-        M_final.Yr(d1*d2*d3,T) = zeros(1,data_type);        
+        % We substituted data_type with single. R"B & DK
+        if nd == 2; M_final.Y(d1,d2,T) = zeros(1,'single'); end
+        if nd == 3; M_final.Y(d1,d2,d3,T) = zeros(1,'single'); end
+        M_final.Yr(d1*d2*d3,T) = zeros(1,'single');        
     case {'hdf5','h5'}
          if exist(options.h5_filename,'file')
             [pathstr,fname,ext] = fileparts(options.h5_filename);             
@@ -379,9 +381,10 @@ for it = 1:iter
         Mf = cell2mat(Mf);
         
         if ~strcmpi(options.output_type,'mat')
+            disp('strcmpi');
             rem_mem = rem(t+lY-1,options.mem_batch_size);
             if rem_mem == 0; rem_mem = options.mem_batch_size; end            
-            if nd == 2; mem_buffer(:,:,rem_mem-lY+1:rem_mem) = cast(Mf,data_type); end
+            if nd == 2; mem_buffer(:,:,rem_mem-lY+1:rem_mem) = cast(Mf,data_type); disp(['class(mem_buffer) = ' class(mem_buffer)]); disp(['data_type = ' data_type]); end
             if nd == 3; mem_buffer(:,:,:,rem_mem-lY+1:rem_mem) = cast(Mf,data_type); end
         end
         if it == iter
@@ -391,7 +394,7 @@ for it = 1:iter
                 if nd == 3; M_final(:,:,:,t:min(t+bin_width-1,T)) = cast(Mf,data_type); end
             case 'memmap'
                 if rem_mem == options.mem_batch_size || t+lY-1 == T
-                    if nd == 2; M_final.Y(:,:,t+lY-rem_mem:t+lY-1) = mem_buffer(:,:,1:rem_mem); end
+                    if nd == 2; disp(['class(M_final.Y) = ' class(M_final.Y)]); disp(['size(M_final.Y(:,:,t+lY-rem_mem:t+lY-1)) = ' num2str(size(M_final.Y(:,:,t+lY-rem_mem:t+lY-1)))]); disp(['class(mem_buffer) = ' class(mem_buffer)]); disp(['size(mem_buffer(:,:,1:rem_mem)) = ' num2str(size(mem_buffer(:,:,1:rem_mem)))]); M_final.Y(:,:,t+lY-rem_mem:t+lY-1) = mem_buffer(:,:,1:rem_mem); end
                     if nd == 3; M_final.Y(:,:,:,t+lY-rem_mem:t+lY-1) = mem_buffer(:,:,:,1:rem_mem); end
                     M_final.Yr(:,t+lY-rem_mem:t+lY-1) = reshape(mem_buffer(1:d1*d2*d3*rem_mem),d1*d2*d3,rem_mem);
                 end      

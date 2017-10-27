@@ -21,15 +21,20 @@ function [M_final,shifts,template,options,col_shift] = normcorre(Y,options,templ
 nd = 2 + (options.d3 > 1); %max(length(sizY)-1,2);                    % determine whether imaging is 2d or 3d
 
 if isa(Y,'char')
+    disp('Input is a path.')
+    disp(['input path is ' Y])
     [~,~,ext] = fileparts(Y);
+    disp(['ext = ' ext])
     ext = ext(2:end);
-    if strcmpi(ext,'tif') || strcmpi(ext,'tiff');
+    if strcmpi(ext,'tif') || strcmpi(ext,'tiff')
+        disp('Input is a path to a TIFF.')
         tiffInfo = imfinfo(Y);
         filetype = 'tif';
         T = length(tiffInfo);
         if nd == 3
             sizY = [tiffInfo(1).Height,tiffInfo(1).Width,T,1];
         else
+            disp('Getting image data dimensions.')
             sizY = [tiffInfo(1).Height,tiffInfo(1).Width,T];
         end
     elseif strcmpi(ext,'mat')
