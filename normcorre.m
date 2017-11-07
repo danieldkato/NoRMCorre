@@ -195,9 +195,9 @@ switch lower(options.output_type)
         M_final = zeros([sizY,T],data_type);
     case 'memmap'
         M_final = matfile(filename,'Writable',true);
-        if nd == 2; M_final.Y(d1,d2,T) = zeros(1,data_type); end
-        if nd == 3; M_final.Y(d1,d2,d3,T) = zeros(1,data_type); end
-        M_final.Yr(d1*d2*d3,T) = zeros(1,data_type);        
+        if nd == 2; M_final.Y(d1,d2,T) = zeros(1,'single'); end
+        if nd == 3; M_final.Y(d1,d2,d3,T) = zeros(1,'single'); end
+        M_final.Yr(d1*d2*d3,T) = zeros(1,'single');        
     case {'hdf5','h5'}
         if exist(options.h5_filename,'file')
             [pathstr,fname,ext] = fileparts(options.h5_filename);             
